@@ -26,7 +26,7 @@ def post():
                 {"$push": {"mediciones": {"epoch_time": epoch_time, "value": value}}}
             )
 
-            return jsonify({"message": "Medición agregada correctamente"}), 201
+            return jsonify({"message": "Medicion agregada correctamente"}), 201
         else:
             # Si no se encuentra un documento con el mismo nombre de dispositivo,
             # creamos un nuevo documento con el nombre de dispositivo y la lista de mediciones
@@ -35,7 +35,7 @@ def post():
                 "mediciones": [{"epoch_time": epoch_time, "value": value}]
             })
 
-            return jsonify({"message": "Dispositivo agregado y medición agregada correctamente"}), 201
+            return jsonify({"message": "Dispositivo agregado y medicion agregada correctamente"}), 201
     else:
         return jsonify({"message": "Solicitud no válida"}), 400
 
