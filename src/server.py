@@ -7,7 +7,7 @@ app = Flask(__name__)
 app.config["MONGO_URI"] = "mongodb://localhost:27017/Nodo005"
 mongo = PyMongo(app)
 
-@app.route('/api/mediciones', methods=['POST'])
+@app.route('/mediciones', methods=['POST'])
 def post():
     if request.is_json:
         medicion = request.get_json()
