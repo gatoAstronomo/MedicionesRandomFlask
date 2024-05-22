@@ -4,7 +4,7 @@ from bson.json_util import dumps
 import json
 
 app = Flask(__name__)
-app.config["MONGO_URI"] = "mongodb://localhost:27017/005"
+app.config["MONGO_URI"] = "mongodb://localhost:27017/Nodo005"
 mongo = PyMongo(app)
 
 @app.route('/api/mediciones', methods=['POST'])
