@@ -14,7 +14,7 @@ def post():
         device_name = medicion["device_name"]
         epoch_time = medicion["epoch_time"]
         value = medicion["value"]
-        print(request.data())
+        print(dict(request.get_json()))
 
         # Buscamos un documento con el mismo nombre de dispositivo
         device = mongo.db.mediciones.find_one({"device_name": device_name})
