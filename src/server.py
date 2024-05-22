@@ -48,7 +48,8 @@ def imprimirMedicion(medicion):
     print(f'"device_name":{device_name},"epoch_time":{epoch_time},"value":{value}"')
     print("}")
 
-
+def main():
+    app.run(debug=True, host='0.0.0.0', port=8081)
 
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=8081)
+    main()
