@@ -7,6 +7,15 @@ app = Flask(__name__)
 app.config["MONGO_URI"] = "mongodb://localhost:27017/Nodo005"
 mongo = PyMongo(app)
 
+
+def imprimirMedicion(medicion):
+    device_name = medicion["device_name"]
+    epoch_time = medicion["epoch_time"]
+    value = medicion["value"]
+    print("{")
+    print(f'"device_name":{device_name},"epoch_time":{epoch_time},"value":{value}"')
+    print("}")
+
 @app.route('/mediciones', methods=['POST'])
 def post():
     if request.is_json:
@@ -40,13 +49,6 @@ def post():
     else:
         return jsonify({"message": "Solicitud no válida"}), 400
 
-def imprimirMedicion(medicion):
-    device_name = medicion["device_name"]
-    epoch_time = medicion["epoch_time"]
-    value = medicion["value"]
-    print("{")
-    print(f'"device_name":{device_name},"epoch_time":{epoch_time},"value":{value}"')
-    print("}")
 
 def main():
     app.run(debug=True, host='0.0.0.0', port=8081)
