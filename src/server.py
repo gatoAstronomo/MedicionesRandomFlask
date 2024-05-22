@@ -12,7 +12,7 @@ def post():
     if request.is_json:
         medicion = request.get_json()
         device_name = medicion["device_name"]
-        unix_time = medicion["unix_time"]
+        epoch_time = medicion["epoch_time"]
         value = medicion["value"]
 
         # Buscamos un documento con el mismo nombre de dispositivo
@@ -23,7 +23,7 @@ def post():
             # agregamos la nueva medición a la lista de mediciones existente
             mongo.db.mediciones.update_one(
                 {"_id": device["_id"]},
-                {"$push": {"mediciones": {"unix_time": unix_time, "value": value}}}
+                {"$push": {"mediciones": {"epoch_time": epoch_time, "value": value}}}
             )
 
             return jsonify({"message": "Medición agregada correctamente"}), 201
@@ -32,7 +32,7 @@ def post():
             # creamos un nuevo documento con el nombre de dispositivo y la lista de mediciones
             mongo.db.mediciones.insert_one({
                 "device_name": device_name,
-                "mediciones": [{"unix_time": unix_time, "value": value}]
+                "mediciones": [{"epoch_time": epoch_time, "value": value}]
             })
 
             return jsonify({"message": "Dispositivo agregado y medición agregada correctamente"}), 201
