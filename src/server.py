@@ -14,7 +14,7 @@ def post():
         device_name = medicion["device_name"]
         epoch_time = medicion["epoch_time"]
         value = medicion["value"]
-        print(json.dumps(request.get_data(), indent=4))
+        imprimirMedicion(medicion)
 
         # Buscamos un documento con el mismo nombre de dispositivo
         device = mongo.db.mediciones.find_one({"device_name": device_name})
@@ -39,6 +39,16 @@ def post():
             return jsonify({"message": "Dispositivo agregado y medicion agregada correctamente"}), 201
     else:
         return jsonify({"message": "Solicitud no válida"}), 400
+
+def imprimirMedicion(medicion):
+    device_name = medicion["device_name"]
+    epoch_time = medicion["epoch_time"]
+    value = medicion["value"]
+    print("{")
+    print(f'"device_name":{device_name},"epoch_time":{epoch_time},"value":{value}"')
+    print("}")
+
+
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=8081)
