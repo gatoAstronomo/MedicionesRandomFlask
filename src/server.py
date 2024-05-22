@@ -35,7 +35,7 @@ def post():
                 "mediciones": [{"timestamp": timestamp, "value": value}]
             })
 
-            return jsonify({"message": "Medición agregada correctamente"}), 201
+            return jsonify({"message": "Dispositivo agregado y medición agregada correctamente"}), 201
     else:
         return jsonify({"message": "Solicitud no válida"}), 400
 
