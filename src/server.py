@@ -7,6 +7,30 @@ app = Flask(__name__)
 app.config["MONGO_URI"] = "mongodb://localhost:27017/Nodo005"
 mongo = PyMongo(app)
 
+@app.route('/mediciones', methods=['GET'])
+def get():
+    # Obtener el nombre del dispositivo de la solicitud GET
+    device_name = request.args.get('device_name')
+
+    if not device_name:
+        return jsonify({'error': 'No se proporcionó el nombre del dispositivo'}), 400
+
+    # Conectar a la colección "mediciones" en la base de datos MongoDB
+    collection = mongo.db.mediciones
+
+    # Buscar el documento que coincida con el nombre del dispositivo y devolver el último registro de medición
+    result = collection.find_one({'device_name': device_name}, {'mediciones': {'$slice': -1}})
+
+    if not result:
+        return jsonify({'error': 'No se encontraron mediciones para el dispositivo especificado'}), 404
+
+    # Formatear el resultado en el formato deseado
+    last_measurement = result['mediciones'][0]
+    formatted_result = {'device_name': device_name, 'epoch_time': last_measurement['epoch_time'], 'value': last_measurement['value']}
+
+    # Devolver el resultado como una respuesta JSON
+    return jsonify(formatted_result)
+
 @app.route('/mediciones', methods=['POST'])
 def post():
     if request.is_json:
@@ -14,6 +38,7 @@ def post():
         device_name = medicion["device_name"]
         epoch_time = medicion["epoch_time"]
         value = medicion["value"]
+        print(medicion)
         
 
         # Buscamos un documento con el mismo nombre de dispositivo
@@ -26,7 +51,7 @@ def post():
                 {"_id": device["_id"]},
                 {"$push": {"mediciones": {"epoch_time": epoch_time, "value": value}}}
             )
-            print(medicion)
+
             return jsonify({"message": "Medicion agregada correctamente"}), 201
         else:
             # Si no se encuentra un documento con el mismo nombre de dispositivo,
@@ -35,7 +60,7 @@ def post():
                 "device_name": device_name,
                 "mediciones": [{"epoch_time": epoch_time, "value": value}]
             })
-            print(medicion)
+            
             return jsonify({"message": "Dispositivo agregado y medicion agregada correctamente"}), 201
     else:
         return jsonify({"message": "Solicitud no válida"}), 400
