@@ -9,16 +9,12 @@ mongo = PyMongo(app)
 
 @app.route('/mediciones', methods=['GET'])
 def get():
-    # Obtener el nombre del dispositivo de la solicitud GET
     device_name = request.args.get('device_name')
 
     if not device_name:
         return jsonify({'error': 'No se proporcionó el nombre del dispositivo'}), 400
 
-    # Conectar a la colección "mediciones" en la base de datos MongoDB
     collection = mongo.db.mediciones
-
-    # Buscar el documento que coincida con el nombre del dispositivo y devolver el último registro de medición
     result = collection.find_one({'device_name': device_name}, {'mediciones': {'$slice': -1}})
 
     if not result:
@@ -28,7 +24,6 @@ def get():
     last_measurement = result['mediciones'][0]
     formatted_result = {'device_name': device_name, 'epoch_time': last_measurement['epoch_time'], 'value': last_measurement['value']}
 
-    # Devolver el resultado como una respuesta JSON
     return jsonify(formatted_result)
 
 @app.route('/mediciones', methods=['POST'])
@@ -40,13 +35,11 @@ def post():
         value = medicion["value"]
         print(medicion)
         
-
-        # Buscamos un documento con el mismo nombre de dispositivo
         device = mongo.db.mediciones.find_one({"device_name": device_name})
 
         if device:
-            # Si se encuentra un documento con el mismo nombre de dispositivo,
-            # agregamos la nueva medición a la lista de mediciones existente
+            """ Si se encuentra un documento con el mismo nombre de dispositivo,
+                agregamos la nueva medición a la lista de mediciones existente """
             mongo.db.mediciones.update_one(
                 {"_id": device["_id"]},
                 {"$push": {"mediciones": {"epoch_time": epoch_time, "value": value}}}
@@ -54,8 +47,8 @@ def post():
 
             return jsonify({"message": "Medicion agregada correctamente"}), 201
         else:
-            # Si no se encuentra un documento con el mismo nombre de dispositivo,
-            # creamos un nuevo documento con el nombre de dispositivo y la lista de mediciones
+            """ Si no se encuentra un documento con el mismo nombre de dispositivo,
+                creamos un nuevo documento con el nombre de dispositivo y la lista de mediciones """
             mongo.db.mediciones.insert_one({
                 "device_name": device_name,
                 "mediciones": [{"epoch_time": epoch_time, "value": value}]
