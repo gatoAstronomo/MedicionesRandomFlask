@@ -3,6 +3,7 @@ import time
 import datetime
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
+import matplotlib.animation as animation
 
 
 def pedirUltimaMedicion(device_name):
@@ -56,7 +57,7 @@ def graficarMediciones(mediciones):
         except Exception as e:
             print(f"Error al actualizar el gráfico: {e}")
 
-    ani = FuncAnimation(fig, actualizar, interval=1000)
+    ani = animation.FuncAnimation(fig, actualizar, interval=1000)
     plt.show()
 
 
@@ -64,7 +65,7 @@ mediciones = []
 mediciones.append(pedirUltimaMedicion("Nodo005"))
 
 def mainloop():
-    graficarMediciones(mediciones)
+    # graficarMediciones(mediciones)
     while True:
         medicion = pedirUltimaMedicion("Nodo005")
         ultimaMedicion = mediciones[-1]
