@@ -16,10 +16,15 @@ logger = logging.getLogger(__name__)
 
 def obtener_todos_los_datos():
     try:
-        return list(mongo.db.mediciones.find({}, {'_id': 0}))
+        result = mongo.db.mediciones.find_one({}, {'_id': 0})
+        if result:
+            return result['mediciones']
+        else:
+            return []
     except Exception as error:
         logger.error(f"Error al obtener datos: {error}")
         return []
+
     
 def obtenerUltimaMedicion(device_name):
     collection = mongo.db.mediciones
