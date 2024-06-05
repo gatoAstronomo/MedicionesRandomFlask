@@ -1,11 +1,38 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template
 from flask_pymongo import PyMongo
+from datetime import datetime
+import pytz
+import logging
 from bson.json_util import dumps
 import json
 
 app = Flask(__name__)
 app.config["MONGO_URI"] = "mongodb://localhost:27017/Nodo005"
 mongo = PyMongo(app)
+
+# Configuración del logger
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+def obtener_todos_los_datos():
+    try:
+        return list(mongo.db.mediciones.find({}, {'_id': 0}))
+    except Exception as error:
+        logger.error(f"Error al obtener datos: {error}")
+        return []
+    
+def obtenerUltimaMedicion(device_name):
+    collection = mongo.db.mediciones
+    result = collection.find_one({'device_name': device_name}, {'mediciones': {'$slice': -1}})
+
+    if not result:
+        return jsonify({'error': 'No se encontraron mediciones para el dispositivo especificado'}), 404
+
+    last_measurement = result['mediciones'][0]
+    formatted_result = {'device_name': device_name, 'epoch_time': last_measurement['epoch_time'], 'temperature': last_measurement['temperature'], 'humidity': last_measurement['humidity']}
+
+    return jsonify(formatted_result)
+
 
 @app.route('/mediciones', methods=['GET'])
 def get():
@@ -68,6 +95,11 @@ def imprimirMedicion(medicion):
     print("{")
     print(f'"device_name":{device_name},"epoch_time":{epoch_time},"temperature":{temperature}","humidity":{humidity}')
     print("}")
+
+# Rutas
+@app.route('/')
+def pagina_principal():
+    return render_template('indexArturo.html', datos_temperatura=obtener_todos_los_datos())
 
 def main():
     app.run(debug=True, host='0.0.0.0', port=8081)
