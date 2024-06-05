@@ -45,17 +45,19 @@
                 if (data.length > 0) {
                     var ultimoDato = data[data.length - 1];
                     var ultimoDatoData = [
+                        ultimoDato.device_name,
                         ultimoDato.epoch_time,
-                        ultimoDato.temperature,
                         ultimoDato.humidity,
+                        ultimoDato.temperature,
                     ];
                     $('#tablaUltimoDato').DataTable().clear().rows.add([ultimoDatoData]).draw();
                 }
                 var dataTableData = data.map(function(item) {
                     return [
+                        item.device_name,
                         item.epoch_time,
-                        item.temperature,
                         item.humidity,
+                        item.temperature,
                     ];
                 });
                 var table = $('#tablaDatosDeArturo').DataTable();
@@ -94,7 +96,7 @@
             ordering: false,
             info: false
         });
-        setInterval(actualizarDatos, 5000);
+        setInterval(actualizarDatos, 1000);
     });
     </script>
 </body>
