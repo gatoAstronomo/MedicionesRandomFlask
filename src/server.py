@@ -36,7 +36,7 @@ def obtenerUltimaMedicion(device_name):
 
 @app.route('/mediciones', methods=['GET'])
 def get():
-    device_name = request.args.get('device_name')
+    device_name = "Nodo005"
 
     if not device_name:
         return jsonify({'error': 'No se proporcionó el nombre del dispositivo'}), 400
