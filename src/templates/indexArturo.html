@@ -42,39 +42,35 @@
             type: 'GET',
             dataType: 'json',
             success: function(data) {
-                if (data.length > 0) {
-                    var ultimoDato = data[data.length - 1];
-                    var ultimoDatoData = [
-                        ultimoDato.device_name,
-                        ultimoDato.epoch_time,
-                        ultimoDato.humidity,
-                        ultimoDato.temperature,
-                    ];
-                    $('#tablaUltimoDato').DataTable().clear().rows.add([ultimoDatoData]).draw();
-                }
-                var dataTableData = data.map(function(item) {
+                var ultimoDatoData = [
+                    new Date(data.epoch_time * 1000).toLocaleString(),
+                    data.temperature,
+                    data.humidity
+                ];
+                $('#tablaUltimoDato').DataTable().clear().rows.add([ultimoDatoData]).draw();
+
+                var dataTableData = data.mediciones.map(function(item) {
                     return [
-                        item.device_name,
-                        item.epoch_time,
-                        item.humidity,
+                        new Date(item.epoch_time * 1000).toLocaleString(),
                         item.temperature,
+                        item.humidity
                     ];
                 });
-                var table = $('#tablaDatosDeArturo').DataTable();
+                var table = $('#tablaDatos').DataTable();
                 var estadoTabla = table.state();
-                if ($.fn.DataTable.isDataTable('#tablaDatosDeArturo')) {
-                    $('#tablaDatosdeArturo').DataTable().destroy();
+                if ($.fn.DataTable.isDataTable('#tablaDatos')) {
+                    $('#tablaDatos').DataTable().destroy();
                 }
                 var tablaDatos = $('#tablaDatos').DataTable({
                     searching: true,
                     paging: true,
                     ordering: true,
-                    stateSave: true, 
+                    stateSave: true,
                     stateSaveCallback: function(settings, data) {
-                        localStorage.setItem('tablaDatosDeArturo', JSON.stringify(data));
+                        localStorage.setItem('tablaDatos', JSON.stringify(data));
                     },
                     stateLoadCallback: function(settings) {
-                        return JSON.parse(localStorage.getItem('tablaDatosDeArturo'));
+                        return JSON.parse(localStorage.getItem('tablaDatos'));
                     }
                 });
 

@@ -6,9 +6,9 @@ import matplotlib.dates as mdates
 import matplotlib.animation as animation
 
 
-def pedirUltimaMedicion(device_name):
+def pedirUltimaMedicion():
     try:
-        response = requests.get(f'http://44.197.32.169:8081/mediciones?device_name={device_name}')
+        response = requests.get(f'http://44.197.32.169:8081/mediciones')
         medicion = response.json()
         medicion["epoch_time"] += 3600 * 3
         return medicion
@@ -58,7 +58,7 @@ def graficarMediciones(mediciones):
 
     def actualizar(i):
         try:
-            ultima_medicion = pedirUltimaMedicion("Nodo005")
+            ultima_medicion = pedirUltimaMedicion()
             epoch_times.append(transformarEpochTime(ultima_medicion))
             temperatures.append(ultima_medicion.get("temperature"))
             if ultima_medicion.get("epoch_time") != mediciones[-1].get("epoch_time"):
@@ -83,7 +83,7 @@ def graficarMediciones(mediciones):
     plt.show()
 
 mediciones = []
-mediciones.append(pedirUltimaMedicion("Nodo005"))
+mediciones.append(pedirUltimaMedicion())
 
 def main():
     graficarMediciones(mediciones)
