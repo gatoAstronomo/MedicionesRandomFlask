@@ -1,14 +1,25 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Gráfico de Temperatura</title>
+    <title>Gráficos de Temperatura y Humedad</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .chart-container {
+            width: 50%;
+            display: inline-block;
+        }
+    </style>
 </head>
 <body>
-    <canvas id="temperatureChart"></canvas>
+    <div class="chart-container">
+        <canvas id="temperatureChart"></canvas>
+    </div>
+    <div class="chart-container">
+        <canvas id="humidityChart"></canvas>
+    </div>
 
     <script>
-        const ctx = document.getElementById('temperatureChart').getContext('2d');
+        const temperatureCtx = document.getElementById('temperatureChart').getContext('2d');
         const temperatureData = {
             labels: [],
             datasets: [{
@@ -18,7 +29,7 @@
                 fill: false
             }]
         };
-        const temperatureChart = new Chart(ctx, {
+        const temperatureChart = new Chart(temperatureCtx, {
             type: 'line',
             data: temperatureData,
             options: {
@@ -41,14 +52,48 @@
             }
         });
 
+        const humidityCtx = document.getElementById('humidityChart').getContext('2d');
+        const humidityData = {
+            labels: [],
+            datasets: [{
+                label: 'Humedad',
+                data: [],
+                borderColor: 'blue',
+                fill: false
+            }]
+        };
+        const humidityChart = new Chart(humidityCtx, {
+            type: 'line',
+            data: humidityData,
+            options: {
+                scales: {
+                    xAxes: [{
+                        type: 'time',
+                        time: {
+                            unit: 'second',
+                            displayFormats: {
+                                second: 'HH:mm:ss'
+                            }
+                        }
+                    }],
+                    yAxes: [{
+                        ticks: {
+                            beginAtZero: true
+                        }
+                    }]
+                }
+            }
+        });
+
         let ultimoEpochTime = null;
 
-        function actualizarGrafico() {
+        function actualizarGraficos() {
             fetch('/mediciones')
                 .then(response => response.json())
                 .then(data => {
-                    const epochTime = data.epoch_time +3*3600;
+                    const epochTime = data.epoch_time;
                     const temperature = data.temperature;
+                    const humidity = data.humidity;
 
                     if (ultimoEpochTime === null || epochTime > ultimoEpochTime) {
                         const date = new Date(epochTime * 1000);
@@ -57,12 +102,19 @@
                         temperatureData.labels.push(time);
                         temperatureData.datasets[0].data.push(temperature);
 
+                        humidityData.labels.push(time);
+                        humidityData.datasets[0].data.push(humidity);
+
                         if (temperatureData.labels.length > 20) {
                             temperatureData.labels.shift();
                             temperatureData.datasets[0].data.shift();
+
+                            humidityData.labels.shift();
+                            humidityData.datasets[0].data.shift();
                         }
 
                         temperatureChart.update();
+                        humidityChart.update();
 
                         ultimoEpochTime = epochTime;
                     }
@@ -70,7 +122,7 @@
                 .catch(error => console.error('Error:', error));
         }
 
-        setInterval(actualizarGrafico, 1000);
+        setInterval(actualizarGraficos, 1000);
     </script>
 </body>
 </html>
