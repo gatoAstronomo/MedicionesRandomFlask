@@ -38,24 +38,24 @@
     <script>
     function actualizarDatos() {
         $.ajax({
-            url: '/rak11200',
+            url: '/mediciones',
             type: 'GET',
             dataType: 'json',
             success: function(data) {
                 if (data.length > 0) {
                     var ultimoDato = data[data.length - 1];
                     var ultimoDatoData = [
-                        ultimoDato.hora_lectura,
-                        ultimoDato.temperatura,
-                        ultimoDato.humedad,
+                        ultimoDato.epoch_time,
+                        ultimoDato.temperature,
+                        ultimoDato.humidity,
                     ];
                     $('#tablaUltimoDato').DataTable().clear().rows.add([ultimoDatoData]).draw();
                 }
                 var dataTableData = data.map(function(item) {
                     return [
-                        item.hora_lectura,
-                        item.temperatura,
-                        item.humedad,
+                        item.epoch_time,
+                        item.temperature,
+                        item.humidity,
                     ];
                 });
                 var table = $('#tablaDatosDeArturo').DataTable();
