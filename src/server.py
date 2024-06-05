@@ -28,7 +28,7 @@ def obtener_todos_los_datos():
 
 @app.route('/allMediciones', methods=['GET'])
 def obetener_todas_mediciones():
-    return jsonify(obetener_todas_mediciones)
+    return jsonify(obetener_todas_mediciones())
 
     
 def obtenerUltimaMedicion(device_name):
