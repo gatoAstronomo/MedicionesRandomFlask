@@ -25,6 +25,11 @@ def obtener_todos_los_datos():
         logger.error(f"Error al obtener datos: {error}")
         return []
 
+
+@app.route('/allMediciones', methods=['GET'])
+def obetener_todas_mediciones():
+    return jsonify(obetener_todas_mediciones);
+
     
 def obtenerUltimaMedicion(device_name):
     collection = mongo.db.mediciones
