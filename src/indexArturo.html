@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visualización de Datos Ambientales</title>
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.24/css/jquery.dataTables.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://code.jquery.com/jquery-3.5.1.js" charset="utf8"></script>
+    <script src="https://cdn.datatables.net/1.10.24/js/jquery.dataTables.js" charset="utf8"></script>
+</head>
+<body class="bg-light">
+    <h1>Datos Ambientales</h1>
+    <!-- Tabla para Último Dato -->
+    <h2>Última lectura</h2>
+    <table id="tablaUltimoDato" class="table table-bordered table-striped">
+        <thead class="thead-dark">
+            <tr>
+                <th>Hora de Lectura</th>
+                <th>Temperatura (°C)</th>
+                <th>Humedad (%)</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+
+    <h2>Todas las lecturas</h2>
+    <table id="tablaDatos" class="table table-bordered table-striped">
+        <thead class="thead-dark">
+            <tr>
+                <th>Hora de Lectura</th>
+                <th>Temperatura (°C)</th>
+                <th>Humedad (%)</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+    <script>
+    function actualizarDatos() {
+        $.ajax({
+            url: '/rak11200',
+            type: 'GET',
+            dataType: 'json',
+            success: function(data) {
+                if (data.length > 0) {
+                    var ultimoDato = data[data.length - 1];
+                    var ultimoDatoData = [
+                        ultimoDato.hora_lectura,
+                        ultimoDato.temperatura,
+                        ultimoDato.humedad,
+                    ];
+                    $('#tablaUltimoDato').DataTable().clear().rows.add([ultimoDatoData]).draw();
+                }
+                var dataTableData = data.map(function(item) {
+                    return [
+                        item.hora_lectura,
+                        item.temperatura,
+                        item.humedad,
+                    ];
+                });
+                var table = $('#tablaDatosDeArturo').DataTable();
+                var estadoTabla = table.state();
+                if ($.fn.DataTable.isDataTable('#tablaDatosDeArturo')) {
+                    $('#tablaDatosdeArturo').DataTable().destroy();
+                }
+                var tablaDatos = $('#tablaDatos').DataTable({
+                    searching: true,
+                    paging: true,
+                    ordering: true,
+                    stateSave: true, 
+                    stateSaveCallback: function(settings, data) {
+                        localStorage.setItem('tablaDatosDeArturo', JSON.stringify(data));
+                    },
+                    stateLoadCallback: function(settings) {
+                        return JSON.parse(localStorage.getItem('tablaDatosDeArturo'));
+                    }
+                });
+
+                tablaDatos.clear().rows.add(dataTableData).draw();
+                if (estadoTabla) {
+                    tablaDatos.state(estadoTabla);
+                }
+            },
+            error: function(error) {
+                console.error('Error al obtener datos:', error);
+            }
+        });
+    }
+
+    $(document).ready(function() {
+        $('#tablaUltimoDato').DataTable({
+            searching: false,
+            paging: false,
+            ordering: false,
+            info: false
+        });
+        setInterval(actualizarDatos, 5000);
+    });
+    </script>
+</body>
+</html>
