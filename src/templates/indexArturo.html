@@ -1,99 +1,76 @@
 <!DOCTYPE html>
-<html lang="es">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Visualización de Datos Ambientales</title>
-    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.24/css/jquery.dataTables.css">
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    <script src="https://code.jquery.com/jquery-3.5.1.js" charset="utf8"></script>
-    <script src="https://cdn.datatables.net/1.10.24/js/jquery.dataTables.js" charset="utf8"></script>
+    <title>Gráfico de Temperatura</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
-<body class="bg-light">
-    <h1>Datos Ambientales</h1>
-    <!-- Tabla para Último Dato -->
-    <h2>Última lectura</h2>
-    <table id="tablaUltimoDato" class="table table-bordered table-striped">
-        <thead class="thead-dark">
-            <tr>
-                <th>Hora de Lectura</th>
-                <th>Temperatura (°C)</th>
-                <th>Humedad (%)</th>
-            </tr>
-        </thead>
-        <tbody></tbody>
-    </table>
+<body>
+    <canvas id="temperatureChart"></canvas>
 
-    <h2>Todas las lecturas</h2>
-    <table id="tablaDatos" class="table table-bordered table-striped">
-        <thead class="thead-dark">
-            <tr>
-                <th>Hora de Lectura</th>
-                <th>Temperatura (°C)</th>
-                <th>Humedad (%)</th>
-            </tr>
-        </thead>
-        <tbody></tbody>
-    </table>
     <script>
-    function actualizarDatos() {
-        $.ajax({
-            url: '/mediciones',
-            type: 'GET',
-            dataType: 'json',
-            success: function(data) {
-                var ultimoDatoData = [
-                    new Date(data.epoch_time * 1000).toLocaleString(),
-                    data.temperature,
-                    data.humidity
-                ];
-                $('#tablaUltimoDato').DataTable().clear().rows.add([ultimoDatoData]).draw();
-
-                var dataTableData = data.mediciones.map(function(item) {
-                    return [
-                        new Date(item.epoch_time * 1000).toLocaleString(),
-                        item.temperature,
-                        item.humidity
-                    ];
-                });
-                var table = $('#tablaDatos').DataTable();
-                var estadoTabla = table.state();
-                if ($.fn.DataTable.isDataTable('#tablaDatos')) {
-                    $('#tablaDatos').DataTable().destroy();
+        const ctx = document.getElementById('temperatureChart').getContext('2d');
+        const temperatureData = {
+            labels: [],
+            datasets: [{
+                label: 'Temperatura',
+                data: [],
+                borderColor: 'red',
+                fill: false
+            }]
+        };
+        const temperatureChart = new Chart(ctx, {
+            type: 'line',
+            data: temperatureData,
+            options: {
+                scales: {
+                    xAxes: [{
+                        type: 'time',
+                        time: {
+                            unit: 'second',
+                            displayFormats: {
+                                second: 'HH:mm:ss'
+                            }
+                        }
+                    }],
+                    yAxes: [{
+                        ticks: {
+                            beginAtZero: true
+                        }
+                    }]
                 }
-                var tablaDatos = $('#tablaDatos').DataTable({
-                    searching: true,
-                    paging: true,
-                    ordering: true,
-                    stateSave: true,
-                    stateSaveCallback: function(settings, data) {
-                        localStorage.setItem('tablaDatos', JSON.stringify(data));
-                    },
-                    stateLoadCallback: function(settings) {
-                        return JSON.parse(localStorage.getItem('tablaDatos'));
-                    }
-                });
-
-                tablaDatos.clear().rows.add(dataTableData).draw();
-                if (estadoTabla) {
-                    tablaDatos.state(estadoTabla);
-                }
-            },
-            error: function(error) {
-                console.error('Error al obtener datos:', error);
             }
         });
-    }
 
-    $(document).ready(function() {
-        $('#tablaUltimoDato').DataTable({
-            searching: false,
-            paging: false,
-            ordering: false,
-            info: false
-        });
-        setInterval(actualizarDatos, 1000);
-    });
+        let ultimoEpochTime = null;
+
+        function actualizarGrafico() {
+            fetch('/mediciones')
+                .then(response => response.json())
+                .then(data => {
+                    const epochTime = data.epoch_time;
+                    const temperature = data.temperature;
+
+                    if (ultimoEpochTime === null || epochTime > ultimoEpochTime) {
+                        const date = new Date(epochTime * 1000);
+                        const time = date.toLocaleTimeString();
+
+                        temperatureData.labels.push(time);
+                        temperatureData.datasets[0].data.push(temperature);
+
+                        if (temperatureData.labels.length > 20) {
+                            temperatureData.labels.shift();
+                            temperatureData.datasets[0].data.shift();
+                        }
+
+                        temperatureChart.update();
+
+                        ultimoEpochTime = epochTime;
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
+        setInterval(actualizarGrafico, 1000);
     </script>
 </body>
 </html>
