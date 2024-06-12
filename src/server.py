@@ -39,7 +39,7 @@ def obtenerUltimaMedicion(device_name):
         return jsonify({'error': 'No se encontraron mediciones para el dispositivo especificado'}), 404
 
     last_measurement = result['mediciones'][0]
-    formatted_result = {'device_name': device_name, 'epoch_time': last_measurement['epoch_time'], 'temperature': last_measurement['temperature'], 'humidity': last_measurement['humidity']}
+    formatted_result = {'device_name': device_name, 'epoch_time': last_measurement['epoch_time'], 'temperature': last_measurement['temperature'], 'humidity': last_measurement['humidity'], 'PM25': last_measurement['PM25']}
 
     return jsonify(formatted_result)
 
@@ -59,7 +59,7 @@ def get():
 
     # Formatear el resultado en el formato deseado
     last_measurement = result['mediciones'][0]
-    formatted_result = {'device_name': device_name, 'epoch_time': last_measurement['epoch_time'], 'temperature': last_measurement['temperature'], 'humidity': last_measurement['humidity']}
+    formatted_result = {'device_name': device_name, 'epoch_time': last_measurement['epoch_time'], 'temperature': last_measurement['temperature'], 'humidity': last_measurement['humidity'], 'PM25': last_measurement['PM25']}
 
     return jsonify(formatted_result)
 
@@ -71,6 +71,7 @@ def post():
         epoch_time = medicion["epoch_time"]
         temperature = medicion["temperature"]
         humidity = medicion["humidity"]
+        PM25 = medicion["PM25"]
         print(medicion)
         
         device = mongo.db.mediciones.find_one({"device_name": device_name})
@@ -80,7 +81,7 @@ def post():
                 agregamos la nueva medición a la lista de mediciones existente """
             mongo.db.mediciones.update_one(
                 {"_id": device["_id"]},
-                {"$push": {"mediciones": {"epoch_time": epoch_time, "temperature": temperature, "humidity": humidity}}}
+                {"$push": {"mediciones": {"epoch_time": epoch_time, "temperature": temperature, "humidity": humidity, "PM25": PM25}}}
             )
 
             return jsonify({"message": "Medicion agregada correctamente"}), 201
@@ -89,7 +90,7 @@ def post():
                 creamos un nuevo documento con el nombre de dispositivo y la lista de mediciones """
             mongo.db.mediciones.insert_one({
                 "device_name": device_name,
-                "mediciones": [{"epoch_time": epoch_time, "temperature": temperature, "humidity": humidity}]
+                "mediciones": [{"epoch_time": epoch_time, "temperature": temperature, "humidity": humidity, "PM25": PM25}]
             })
             
             return jsonify({"message": "Dispositivo agregado y medicion agregada correctamente"}), 201
