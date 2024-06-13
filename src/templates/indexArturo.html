@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Gráficos de Temperatura y Humedad</title>
+    <title>Gráficos de Temperatura, Humedad y PM2.5</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         .chart-container {
@@ -16,6 +16,9 @@
     </div>
     <div class="chart-container">
         <canvas id="humidityChart"></canvas>
+    </div>
+    <div class="chart-container">
+        <canvas id="pm25Chart"></canvas>
     </div>
 
     <script>
@@ -85,6 +88,39 @@
             }
         });
 
+        const pm25Ctx = document.getElementById('pm25Chart').getContext('2d');
+        const pm25Data = {
+            labels: [],
+            datasets: [{
+                label: 'Material Particulado PM2.5',
+                data: [],
+                borderColor: 'blue',
+                fill: false
+            }]
+        };
+        const pm25Chart = new Chart(pm25Ctx, {
+            type: 'line',
+            data: pm25Data,
+            options: {
+                scales: {
+                    xAxes: [{
+                        type: 'time',
+                        time: {
+                            unit: 'second',
+                            displayFormats: {
+                                second: 'HH:mm:ss'
+                            }
+                        }
+                    }],
+                    yAxes: [{
+                        ticks: {
+                            beginAtZero: true
+                        }
+                    }]
+                }
+            }
+        });
+
         let ultimoEpochTime = null;
 
         function actualizarGraficos() {
@@ -94,6 +130,7 @@
                     const epochTime = data.epoch_time + 3*3600;
                     const temperature = data.temperature;
                     const humidity = data.humidity;
+                    const PM25 = data.PM25;
 
                     if (ultimoEpochTime === null || epochTime > ultimoEpochTime) {
                         const date = new Date(epochTime * 1000);
