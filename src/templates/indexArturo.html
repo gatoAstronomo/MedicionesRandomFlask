@@ -127,7 +127,7 @@
             fetch('/mediciones')
                 .then(response => response.json())
                 .then(data => {
-                    const epochTime = data.epoch_time + 3*3600;
+                    const epochTime = data.epoch_time;
                     const temperature = data.temperature;
                     const humidity = data.humidity;
                     const pm25 = data.PM25;
