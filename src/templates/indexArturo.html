@@ -130,7 +130,7 @@
                     const epochTime = data.epoch_time + 3*3600;
                     const temperature = data.temperature;
                     const humidity = data.humidity;
-                    const PM25 = data.PM25;
+                    const pm25 = data.PM25;
 
                     if (ultimoEpochTime === null || epochTime > ultimoEpochTime) {
                         const date = new Date(epochTime * 1000);
@@ -142,16 +142,23 @@
                         humidityData.labels.push(time);
                         humidityData.datasets[0].data.push(humidity);
 
+                        humidityData.labels.push(time);
+                        humidityData.datasets[0].data.push(pm25);
+
                         if (temperatureData.labels.length > 20) {
                             temperatureData.labels.shift();
                             temperatureData.datasets[0].data.shift();
 
                             humidityData.labels.shift();
                             humidityData.datasets[0].data.shift();
+
+                            pm25Data.labels.shift();
+                            pm25Data.datasets[0].data.shift();
                         }
 
                         temperatureChart.update();
                         humidityChart.update();
+                        pm25Chart.update();
 
                         ultimoEpochTime = epochTime;
                     }
