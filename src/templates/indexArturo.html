@@ -142,8 +142,8 @@
                         humidityData.labels.push(time);
                         humidityData.datasets[0].data.push(humidity);
 
-                        humidityData.labels.push(time);
-                        humidityData.datasets[0].data.push(pm25);
+                        pm25.labels.push(time);
+                        pm25Data.datasets[0].data.push(pm25);
 
                         if (temperatureData.labels.length > 20) {
                             temperatureData.labels.shift();
