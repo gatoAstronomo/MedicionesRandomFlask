@@ -107,7 +107,7 @@ def extractUndo():
         print(undo["p"][::-1].toString())
         return undo["p"][::-1].toString()
 
-def sendMail(subject, body, config):
+def sendMail(subject, body):
 
     smtp_server = "smtp.gmail.com"
     port = 587  # For starttls
