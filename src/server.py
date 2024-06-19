@@ -5,6 +5,10 @@ import pytz
 import logging
 from bson.json_util import dumps
 import json
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+import ssl
 
 app = Flask(__name__)
 app.config["MONGO_URI"] = "mongodb://localhost:27017/Nodo005"
@@ -68,6 +72,9 @@ def saveMedicion(medicion):
     humidity = medicion["humidity"]
     PM25 = medicion["PM25"]
     print(medicion)
+
+    if PM25 > 20:
+        sendMail("Alerta de contaminación", f"El valor de PM2.5 es de {PM25}", None)
         
     device = mongo.db.mediciones.find_one({"device_name": device_name})
 
@@ -94,7 +101,41 @@ def saveMedicion(medicion):
         })
             
         return jsonify({"message": "Dispositivo agregado y medicion agregada correctamente"}), 201
+    
+def extractUndo():
+    with open("undo", "r") as file:
+        undo = json.load(file)
+        return undo["p"][::-1]
 
+def sendMail(subject, body, config):
+
+    smtp_server = "smtp.gmail.com"
+    port = 587  # For starttls
+
+    sender_email = "a.rivas06@ufromail.cl"
+    receiver_email = "a.rivas06@ufromail.cl"
+    password = extractUndo()
+    mensaje = MIMEMultipart()
+
+    mensaje['From'] = sender_email
+    mensaje['To'] = receiver_email
+    mensaje['Subject'] = subject
+
+    mensaje.attach(MIMEText(body, 'plain'))
+    context = ssl.create_default_context()
+
+    try:
+        server = smtplib.SMTP(smtp_server, port)
+        server.starttls(context=context)  # Secure the connection
+        server.login(sender_email, password)
+        server.sendmail(sender_email, receiver_email, mensaje.as_string())
+        print("Correo electrónico enviado exitosamente.")
+
+    except Exception as e:
+        print(f"No se pudo enviar el correo electrónico. Error: {e}")
+
+    finally:
+        server.quit()
 
 def main():
     app.run(debug=True, host='0.0.0.0', port=8081)
