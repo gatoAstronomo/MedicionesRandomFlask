@@ -87,7 +87,8 @@ def saveMedicion(medicion):
                 "PM25": PM25
                 }}}
         )
-
+        if PM25 > 10:
+            sendMail("Alerta de contaminación", f'El valor de PM2.5 es de {PM25}')
         return jsonify({"message": "Medicion agregada correctamente"}), 201
     else:
         """ Si no se encuentra un documento con el mismo nombre de dispositivo,
@@ -96,7 +97,8 @@ def saveMedicion(medicion):
             "device_name": device_name,
             "mediciones": [{"epoch_time": epoch_time, "temperature": temperature, "humidity": humidity, "PM25": PM25}]
         })
-            
+        if PM25 > 10:
+            sendMail("Alerta de contaminación", f'El valor de PM2.5 es de {PM25}')
         return jsonify({"message": "Dispositivo agregado y medicion agregada correctamente"}), 201
     
 def extractUndo():
