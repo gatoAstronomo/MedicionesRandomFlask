@@ -14,32 +14,10 @@ mongo = PyMongo(app)
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-def obtener_todos_los_datos():
-    try:
-        result = mongo.db.mediciones.find_one({}, {'_id': 0})
-        return result['mediciones']
-    except Exception as error:
-        logger.error(f"Error al obtener datos: {error}")
-        return []
-
 @app.route('/allMediciones', methods=['GET'])
-def obetener_todas_mediciones():
-    return jsonify(obtener_todos_los_datos())
+def getAllMediciones():
+    return jsonify(obtenerTodasLasMediciones())
     
-def obtenerUltimaMedicion(device_name):
-    collection = mongo.db.mediciones
-    result = collection.find_one({'device_name': device_name}, {'mediciones': {'$slice': -1}})
-
-    if not result:
-        return jsonify({'error': 'No se encontraron mediciones para el dispositivo especificado'}), 404
-
-    last_measurement = result['mediciones'][0]
-    formatted_result = {'device_name': device_name, 'epoch_time': last_measurement['epoch_time'], 
-                        'temperature': last_measurement['temperature'], 'humidity': last_measurement['humidity'], 
-                        'PM25': last_measurement['PM25']}
-
-    return jsonify(formatted_result)
-
 @app.route('/mediciones', methods=['GET'])
 def get():
     device_name = "Nodo005"
@@ -55,6 +33,35 @@ def post():
         return jsonify({"message": "Solicitud no válida"}), 400
     
     medicion = request.get_json()
+    return saveMedicion(medicion)
+    
+@app.route('/')
+def pagina_principal():
+    return render_template('indexArturo.html', datos_temperatura=obtenerTodasLasMediciones())
+
+def obtenerUltimaMedicion(device_name):
+    collection = mongo.db.mediciones
+    result = collection.find_one({'device_name': device_name}, {'mediciones': {'$slice': -1}})
+
+    if not result:
+        return jsonify({'error': 'No se encontraron mediciones para el dispositivo especificado'}), 404
+
+    last_measurement = result['mediciones'][0]
+    formatted_result = {'device_name': device_name, 'epoch_time': last_measurement['epoch_time'], 
+                        'temperature': last_measurement['temperature'], 'humidity': last_measurement['humidity'], 
+                        'PM25': last_measurement['PM25']}
+
+    return jsonify(formatted_result)
+
+def obtenerTodasLasMediciones():
+    try:
+        result = mongo.db.mediciones.find_one({}, {'_id': 0})
+        return result['mediciones']
+    except Exception as error:
+        logger.error(f"Error al obtener datos: {error}")
+        return []
+    
+def saveMedicion(medicion):
     device_name = medicion["device_name"]
     epoch_time = medicion["epoch_time"]
     temperature = medicion["temperature"]
@@ -69,7 +76,12 @@ def post():
             agregamos la nueva medición a la lista de mediciones existente """
         mongo.db.mediciones.update_one(
             {"_id": device["_id"]},
-            {"$push": {"mediciones": {"epoch_time": epoch_time, "temperature": temperature, "humidity": humidity, "PM25": PM25}}}
+            {"$push": {"mediciones": {
+                "epoch_time": epoch_time, 
+                "temperature": temperature, 
+                "humidity": humidity, 
+                "PM25": PM25
+                }}}
         )
 
         return jsonify({"message": "Medicion agregada correctamente"}), 201
@@ -82,22 +94,7 @@ def post():
         })
             
         return jsonify({"message": "Dispositivo agregado y medicion agregada correctamente"}), 201
-        
-    
 
-def imprimirMedicion(medicion):
-    device_name = medicion["device_name"]
-    epoch_time = medicion["epoch_time"]
-    temperature = medicion["temperature"]
-    humidity = medicion["humidity"]
-    print("{")
-    print(f'"device_name":{device_name},"epoch_time":{epoch_time},"temperature":{temperature}","humidity":{humidity}')
-    print("}")
-
-# Rutas
-@app.route('/')
-def pagina_principal():
-    return render_template('indexArturo.html', datos_temperatura=obtener_todos_los_datos())
 
 def main():
     app.run(debug=True, host='0.0.0.0', port=8081)
