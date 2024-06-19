@@ -73,7 +73,7 @@ def saveMedicion(medicion):
     PM25 = medicion["PM25"]
     print(medicion)
 
-    if PM25 > 20:
+    if PM25 > 10:
         sendMail("Alerta de contaminación", f"El valor de PM2.5 es de {PM25}", None)
         
     device = mongo.db.mediciones.find_one({"device_name": device_name})
