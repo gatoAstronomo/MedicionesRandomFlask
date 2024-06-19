@@ -102,7 +102,7 @@ def saveMedicion(medicion):
         return jsonify({"message": "Dispositivo agregado y medicion agregada correctamente"}), 201
     
 def extractUndo():
-    with open("/undo.json", "r") as file:
+    with open("/home/ubuntu/undo.json", "r") as file:
         undo = json.load(file)
         print(undo["p"][::-1].toString())
         return undo["p"][::-1].toString()
