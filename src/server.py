@@ -105,7 +105,8 @@ def saveMedicion(medicion):
 def extractUndo():
     with open("undo", "r") as file:
         undo = json.load(file)
-        return undo["p"][::-1]
+        print(undo["p"][::-1].toString())
+        return undo["p"][::-1].toString()
 
 def sendMail(subject, body, config):
 
