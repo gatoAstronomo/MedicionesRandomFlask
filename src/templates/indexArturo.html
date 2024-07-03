@@ -12,29 +12,39 @@
 </head>
 <body>
     <div class="chart-container">
-        <canvas id="temperatureChart"></canvas>
+        <canvas id="x"></canvas>
     </div>
     <div class="chart-container">
-        <canvas id="humidityChart"></canvas>
+        <canvas id="y"></canvas>
     </div>
     <div class="chart-container">
-        <canvas id="pm25Chart"></canvas>
+        <canvas id="z"></canvas>
+    </div>
+
+    <div class="chart-container">
+        <canvas id="gx"></canvas>
+    </div>
+    <div class="chart-container">
+        <canvas id="gy"></canvas>
+    </div>
+    <div class="chart-container">
+        <canvas id="gz"></canvas>
     </div>
 
     <script>
-        const temperatureCtx = document.getElementById('temperatureChart').getContext('2d');
-        const temperatureData = {
+        const xCtx = document.getElementById('x').getContext('2d');
+        const xData = {
             labels: [],
             datasets: [{
-                label: 'Temperatura',
+                label: 'Aceleración en X',
                 data: [],
                 borderColor: 'red',
                 fill: false
             }]
         };
-        const temperatureChart = new Chart(temperatureCtx, {
+        const xChart = new Chart(xCtx, {
             type: 'line',
-            data: temperatureData,
+            data: xData,
             options: {
                 scales: {
                     xAxes: [{
@@ -55,19 +65,19 @@
             }
         });
 
-        const humidityCtx = document.getElementById('humidityChart').getContext('2d');
-        const humidityData = {
+        const yCtx = document.getElementById('y').getContext('2d');
+        const yData = {
             labels: [],
             datasets: [{
-                label: 'Humedad',
+                label: 'Accelaration in Y',
                 data: [],
                 borderColor: 'blue',
                 fill: false
             }]
         };
-        const humidityChart = new Chart(humidityCtx, {
+        const yChart = new Chart(yCtx, {
             type: 'line',
-            data: humidityData,
+            data: yData,
             options: {
                 scales: {
                     xAxes: [{
@@ -88,19 +98,118 @@
             }
         });
 
-        const pm25Ctx = document.getElementById('pm25Chart').getContext('2d');
-        const pm25Data = {
+        const zCtx = document.getElementById('z').getContext('2d');
+        const zData = {
             labels: [],
             datasets: [{
-                label: 'Material Particulado PM2.5',
+                label: 'Accelaration in Z',
                 data: [],
                 borderColor: 'blue',
                 fill: false
             }]
         };
-        const pm25Chart = new Chart(pm25Ctx, {
+        const zChart = new Chart(zCtx, {
             type: 'line',
-            data: pm25Data,
+            data: zData,
+            options: {
+                scales: {
+                    xAxes: [{
+                        type: 'time',
+                        time: {
+                            unit: 'second',
+                            displayFormats: {
+                                second: 'HH:mm:ss'
+                            }
+                        }
+                    }],
+                    yAxes: [{
+                        ticks: {
+                            beginAtZero: true
+                        }
+                    }]
+                }
+            }
+        });
+
+        const gxCtx = document.getElementById('gx').getContext('2d');
+        const gxData = {
+            labels: [],
+            datasets: [{
+                label: 'Giroscopio en X',
+                data: [],
+                borderColor: 'red',
+                fill: false
+            }]
+        };
+        const gxChart = new Chart(gxCtx, {
+            type: 'line',
+            data: gxData,
+            options: {
+                scales: {
+                    xAxes: [{
+                        type: 'time',
+                        time: {
+                            unit: 'second',
+                            displayFormats: {
+                                second: 'HH:mm:ss'
+                            }
+                        }
+                    }],
+                    yAxes: [{
+                        ticks: {
+                            beginAtZero: true
+                        }
+                    }]
+                }
+            }
+        });
+
+        const gyCtx = document.getElementById('gy').getContext('2d');
+        const gyData = {
+            labels: [],
+            datasets: [{
+                label: 'Giroscopio en Y',
+                data: [],
+                borderColor: 'blue',
+                fill: false
+            }]
+        };
+        const gyChart = new Chart(gyCtx, {
+            type: 'line',
+            data: gyData,
+            options: {
+                scales: {
+                    xAxes: [{
+                        type: 'time',
+                        time: {
+                            unit: 'second',
+                            displayFormats: {
+                                second: 'HH:mm:ss'
+                            }
+                        }
+                    }],
+                    yAxes: [{
+                        ticks: {
+                            beginAtZero: true
+                        }
+                    }]
+                }
+            }
+        });
+
+        const gzCtx = document.getElementById('gz').getContext('2d');
+        const gzData = {
+            labels: [],
+            datasets: [{
+                label: 'Giroscopio in Z',
+                data: [],
+                borderColor: 'blue',
+                fill: false
+            }]
+        };
+        const gzChart = new Chart(gzCtx, {
+            type: 'line',
+            data: gzData,
             options: {
                 scales: {
                     xAxes: [{
@@ -128,37 +237,65 @@
                 .then(response => response.json())
                 .then(data => {
                     const epochTime = data.epoch_time;
-                    const temperature = data.temperature;
-                    const humidity = data.humidity;
-                    const pm25 = data.PM25;
+                    const x = data.x;
+                    const y = data.y;
+                    const z = data.z;
+                    
+                    const gx = data.gx;
+                    const gy = data.gy;
+                    const gz = data.gz;
 
                     if (ultimoEpochTime === null || epochTime > ultimoEpochTime) {
                         const date = new Date(epochTime * 1000);
                         const time = date.toLocaleTimeString();
 
-                        temperatureData.labels.push(time);
-                        temperatureData.datasets[0].data.push(temperature);
+                        xData.labels.push(time);
+                        xData.datasets[0].data.push(x);
+                        yData.labels.push(time);
+                        yData.datasets[0].data.push(y);
+                        z.labels.push(time);
+                        z.datasets[0].data.push(z);
 
-                        humidityData.labels.push(time);
-                        humidityData.datasets[0].data.push(humidity);
+                        gxData.labels.push(time);
+                        gxData.datasets[0].data.push(gx);
+                        gyData.labels.push(time);
+                        gyData.datasets[0].data.push(gy);
+                        gz.labels.push(time);
+                        gz.datasets[0].data.push(gz);
 
-                        pm25Data.labels.push(time);
-                        pm25Data.datasets[0].data.push(pm25);
-
-                        if (temperatureData.labels.length > 20) {
-                            temperatureData.labels.shift();
-                            temperatureData.datasets[0].data.shift();
-
-                            humidityData.labels.shift();
-                            humidityData.datasets[0].data.shift();
-
-                            pm25Data.labels.shift();
-                            pm25Data.datasets[0].data.shift();
+                        if (xData.labels.length > 90) {
+                            xData.labels.shift();
+                            xData.datasets[0].data.shift();
+                        }
+                        if (yData.labels.length > 90) {
+                            yData.labels.shift();
+                            yData.datasets[0].data.shift();
+                        }
+                        if (zData.labels.length > 90) {
+                            zData.labels.shift();
+                            zData.datasets[0].data.shift();
                         }
 
-                        temperatureChart.update();
-                        humidityChart.update();
-                        pm25Chart.update();
+                        if (gxData.labels.length > 90) {
+                            gxData.labels.shift();
+                            gxData.datasets[0].data.shift();
+                        }
+                        if (gyData.labels.length > 90) {
+                            gyData.labels.shift();
+                            gyData.datasets[0].data.shift();
+                        }
+                        if (gzData.labels.length > 90) {
+                            gzData.labels.shift();
+                            gzData.datasets[0].data.shift();
+                        }
+
+                        xChart.update();
+                        yChart.update();
+                        zChart.update();
+
+                        gxChart.update();
+                        gyChart.update();
+                        gzChart.update();
 
                         ultimoEpochTime = epochTime;
                     }
