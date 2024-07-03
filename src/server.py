@@ -9,6 +9,7 @@ import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 import ssl
+from math import sqrt
 
 app = Flask(__name__)
 app.config["MONGO_URI"] = "mongodb://localhost:27017/Nodo005"
@@ -52,8 +53,8 @@ def obtenerUltimaMedicion(device_name):
 
     last_measurement = result['mediciones'][0]
     formatted_result = {'device_name': device_name, 'epoch_time': last_measurement['epoch_time'], 
-                        'temperature': last_measurement['temperature'], 'humidity': last_measurement['humidity'], 
-                        'PM25': last_measurement['PM25']}
+                        'x': last_measurement['x'], 'y': last_measurement['y'], 
+                        'z': last_measurement['z']}
 
     return jsonify(formatted_result)
 
@@ -68,9 +69,9 @@ def obtenerTodasLasMediciones():
 def saveMedicion(medicion):
     device_name = medicion["device_name"]
     epoch_time = medicion["epoch_time"]
-    temperature = medicion["temperature"]
-    humidity = medicion["humidity"]
-    PM25 = medicion["PM25"]
+    x = medicion["x"]
+    y = medicion["y"]
+    z = medicion["z"]
     print(medicion)
         
     device = mongo.db.mediciones.find_one({"device_name": device_name})
@@ -82,9 +83,9 @@ def saveMedicion(medicion):
             {"_id": device["_id"]},
             {"$push": {"mediciones": {
                 "epoch_time": epoch_time, 
-                "temperature": temperature, 
-                "humidity": humidity, 
-                "PM25": PM25
+                "x": x, 
+                "y": y, 
+                "z": z
                 }}}
         )
         if PM25 > 10:
@@ -95,11 +96,14 @@ def saveMedicion(medicion):
             creamos un nuevo documento con el nombre de dispositivo y la lista de mediciones """
         mongo.db.mediciones.insert_one({
             "device_name": device_name,
-            "mediciones": [{"epoch_time": epoch_time, "temperature": temperature, "humidity": humidity, "PM25": PM25}]
+            "mediciones": [{"epoch_time": epoch_time, "x": x, "y": y, "z": z}]
         })
-        if PM25 > 50:
-            sendMail("Alerta de contaminación", f'El valor de PM2.5 es de {PM25}')
+        if modulo() > 2:
+            sendMail("Anomalia se esta agotando el combustible", f'El vector aceleracion es ({x},{y},{z})')
         return jsonify({"message": "Dispositivo agregado y medicion agregada correctamente"}), 201
+    
+def modulo(x, y, z):
+    return sqrt(x**2 + y**2 + z**2)
     
 def extractUndo():
     with open("/home/ubuntu/undo.json", "r") as file:
