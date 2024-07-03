@@ -129,7 +129,7 @@ def sendMail(subject, body):
     port = 587  # For starttls
 
     sender_email = "a.rivas06@ufromail.cl"
-    receiver_email = "a.rivas06@ufromail.cl"
+    receiver_email = "jorge.diaz@ufrontera.cl"
     password = extractUndo()
     mensaje = MIMEMultipart()
 
