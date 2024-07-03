@@ -53,8 +53,12 @@ def obtenerUltimaMedicion(device_name):
 
     last_measurement = result['mediciones'][0]
     formatted_result = {'device_name': device_name, 'epoch_time': last_measurement['epoch_time'], 
-                        'x': last_measurement['x'], 'y': last_measurement['y'], 
-                        'z': last_measurement['z']}
+                        'x': last_measurement['x'], 
+                        'y': last_measurement['y'], 
+                        'z': last_measurement['z'], 
+                        'gx': last_measurement['gx'], 
+                        'gy': last_measurement['gy'], 
+                        'gz': last_measurement['gz']}
 
     return jsonify(formatted_result)
 
@@ -72,13 +76,16 @@ def saveMedicion(medicion):
     x = medicion["x"]
     y = medicion["y"]
     z = medicion["z"]
+    gx = medicion["gx"]
+    gy = medicion["gy"]
+    gz = medicion["gz"]
     print(medicion)
     print(modulo(x,y,z))
         
     device = mongo.db.mediciones.find_one({"device_name": device_name})
 
     if modulo(x,y,z) > 2:
-            sendMail("Anomalia se esta agotando el combustible", f'El vector aceleracion es ({x},{y},{z})')
+            sendMail("Anomalia se esta agotando el combustible", f'El vector aceleracion es ({x},{y},{z}) el giroscopio es ({gx},{gy},{gz})')
 
     if device:
         """ Si se encuentra un documento con el mismo nombre de dispositivo,
@@ -89,7 +96,10 @@ def saveMedicion(medicion):
                 "epoch_time": epoch_time, 
                 "x": x, 
                 "y": y, 
-                "z": z
+                "z": z,
+                "gx": gx, 
+                "gy": gy, 
+                "gz": gz
                 }}}
         )
         
@@ -99,7 +109,7 @@ def saveMedicion(medicion):
             creamos un nuevo documento con el nombre de dispositivo y la lista de mediciones """
         mongo.db.mediciones.insert_one({
             "device_name": device_name,
-            "mediciones": [{"epoch_time": epoch_time, "x": x, "y": y, "z": z}]
+            "mediciones": [{"epoch_time": epoch_time, "x": x, "y": y, "z": z, "gx": gx, "gy": gy, "gz": gz}]
         })
 
         return jsonify({"message": "Dispositivo agregado y medicion agregada correctamente"}), 201
