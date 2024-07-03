@@ -76,7 +76,7 @@ def saveMedicion(medicion):
         
     device = mongo.db.mediciones.find_one({"device_name": device_name})
 
-    if modulo() > 2:
+    if modulo(x,y,z) > 2:
             sendMail("Anomalia se esta agotando el combustible", f'El vector aceleracion es ({x},{y},{z})')
 
     if device:
