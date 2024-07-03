@@ -76,6 +76,9 @@ def saveMedicion(medicion):
         
     device = mongo.db.mediciones.find_one({"device_name": device_name})
 
+    if modulo() > 2:
+            sendMail("Anomalia se esta agotando el combustible", f'El vector aceleracion es ({x},{y},{z})')
+
     if device:
         """ Si se encuentra un documento con el mismo nombre de dispositivo,
             agregamos la nueva medición a la lista de mediciones existente """
@@ -88,8 +91,7 @@ def saveMedicion(medicion):
                 "z": z
                 }}}
         )
-        if PM25 > 10:
-            sendMail("Alerta de contaminación", f'El valor de PM2.5 es de {PM25}')
+        
         return jsonify({"message": "Medicion agregada correctamente"}), 201
     else:
         """ Si no se encuentra un documento con el mismo nombre de dispositivo,
@@ -98,8 +100,7 @@ def saveMedicion(medicion):
             "device_name": device_name,
             "mediciones": [{"epoch_time": epoch_time, "x": x, "y": y, "z": z}]
         })
-        if modulo() > 2:
-            sendMail("Anomalia se esta agotando el combustible", f'El vector aceleracion es ({x},{y},{z})')
+
         return jsonify({"message": "Dispositivo agregado y medicion agregada correctamente"}), 201
     
 def modulo(x, y, z):
