@@ -73,6 +73,7 @@ def saveMedicion(medicion):
     y = medicion["y"]
     z = medicion["z"]
     print(medicion)
+    print(modulo(x,y,z))
         
     device = mongo.db.mediciones.find_one({"device_name": device_name})
 
