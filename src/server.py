@@ -58,7 +58,8 @@ def obtenerUltimaMedicion(device_name):
                         'z': last_measurement['z'], 
                         'gx': last_measurement['gx'], 
                         'gy': last_measurement['gy'], 
-                        'gz': last_measurement['gz']}
+                        'gz': last_measurement['gz'],
+                        'ismove': last_measurement['ismove']}
 
     return jsonify(formatted_result)
 
@@ -79,6 +80,7 @@ def saveMedicion(medicion):
     gx = medicion["gx"]
     gy = medicion["gy"]
     gz = medicion["gz"]
+    ismove = False
     print(medicion)
     print(modulo(x,y,z))
         
@@ -86,6 +88,8 @@ def saveMedicion(medicion):
 
     if modulo(x,y,z) > 2:
             sendMail("Anomalia se esta agotando el combustible", f'El vector aceleracion es ({x},{y},{z}) el giroscopio es ({gx},{gy},{gz})')
+    if 1.5 < modulo(x,y,z):
+        ismove = True
 
     if device:
         """ Si se encuentra un documento con el mismo nombre de dispositivo,
@@ -99,7 +103,8 @@ def saveMedicion(medicion):
                 "z": z,
                 "gx": gx, 
                 "gy": gy, 
-                "gz": gz
+                "gz": gz,
+                "ismove": ismove
                 }}}
         )
         
@@ -109,7 +114,7 @@ def saveMedicion(medicion):
             creamos un nuevo documento con el nombre de dispositivo y la lista de mediciones """
         mongo.db.mediciones.insert_one({
             "device_name": device_name,
-            "mediciones": [{"epoch_time": epoch_time, "x": x, "y": y, "z": z, "gx": gx, "gy": gy, "gz": gz}]
+            "mediciones": [{"epoch_time": epoch_time, "x": x, "y": y, "z": z, "gx": gx, "gy": gy, "gz": gz, "ismove": ismove}]
         })
 
         return jsonify({"message": "Dispositivo agregado y medicion agregada correctamente"}), 201
@@ -129,7 +134,8 @@ def sendMail(subject, body):
     port = 587  # For starttls
 
     sender_email = "a.rivas06@ufromail.cl"
-    receiver_email = "jorge.diaz@ufrontera.cl"
+    receiver_email = "a.rivas06@ufromail.cl"
+    # receiver_email = "jorge.diaz@ufrontera.cl"
     password = extractUndo()
     mensaje = MIMEMultipart()
 
