@@ -89,7 +89,7 @@ def saveMedicion(medicion):
     if modulo(x,y,z) > 2:
             sendMail("Anomalia se esta agotando el combustible", f'El vector aceleracion es ({x},{y},{z}) el giroscopio es ({gx},{gy},{gz})')
     
-    if (1.01-0.01) < modulo(x,y,z) and modulo(x,y,z) < (1.01+0.02):
+    if (1.01-0.01) < modulo(x,y,z) and modulo(x,y,z) < (1.01+0.01):
         ismove = False
 
     if device:
